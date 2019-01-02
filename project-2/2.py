@@ -3,6 +3,8 @@
 # N-gram Language Models
 # N元语言模型
 
+import itertools
+
 class N_Gram(object):
 	def __init__(self, n, fileName = ''):
 		'fileName is the training set file'
@@ -44,7 +46,19 @@ class N_Gram(object):
 		fp.close()
 
 	def plusOneSmooth(self):
-		pass
+		for p in itertools.product(self.wordSet, repeat = self.history):
+			history = ''
+			for word in p:
+				history += word
+			for word in self.wordSet:
+				if not history in self.data:
+					self.data[history] = {}
+				if not word in self.data[history]:
+					self.data[history][word] = 0
+				self.data[history][word] += 1
+				if not history in self.dataTimes:
+					self.dataTimes[history] = 0
+				self.dataTimes[history] += 1
 
 	def parse(self, s):
 		# judge unknow word
@@ -68,8 +82,14 @@ class N_Gram(object):
 
 
 if __name__ == '__main__':
-	unigram = N_Gram(1, 'data/TheThreeBodyProblem.txt')
+	# unigram = N_Gram(1, 'data/TheThreeBodyProblem.txt')
+	bigram = N_Gram(2, 'data/TheThreeBodyProblem.txt')
+	# trigram = N_Gram(3, 'data/TheThreeBodyProblem.txt')
 	s = input('input a line to parse, input a blank line to stop:')
 	while len(s):
-		unigram.parse(s)
+		# unigram.parse(s)
+		bigram.parse(s)
+		bigram.plusOneSmooth()
+		bigram.parse(s)
+		# trigram.parse(s)
 		s = input('input a line to parse, input a blank line to stop:')

@@ -62,7 +62,7 @@ class N_Gram(object):
 				if s[i - self.history : i] in self.data:
 					result *= self.data[s[i - self.history : i]][s[i]] / self.dataTimes[s[i - self.history : i]]
 				else:
-					print('error')
+					print('error, unknow situation, please try to smooth data')
 			print('result =', result)
 
 

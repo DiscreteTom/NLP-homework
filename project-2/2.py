@@ -59,11 +59,12 @@ class N_Gram(object):
 		else:
 			result = 1
 			for i in range(self.history, len(s)):
-				if s[i - self.history : i] in self.data:
+				if s[i - self.history : i] in self.data and s[i] in self.data[s[i - self.history : i]]:
 					result *= self.data[s[i - self.history : i]][s[i]] / self.dataTimes[s[i - self.history : i]]
 				else:
 					print('error, unknow situation, please try to smooth data')
-			print('result =', result)
+					return
+			print('Word Perplexity:', result ** -(1 / len(s)))
 
 
 if __name__ == '__main__':

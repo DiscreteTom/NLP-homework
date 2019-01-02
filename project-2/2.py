@@ -14,14 +14,18 @@ class N_Gram(object):
 			self.openFile(fileName)
 
 	def openFile(self, fileName):
-		self.data = {}
+		self.data = {} # clear
+
 		fp = open(fileName, 'r', encoding = 'utf-8')
 		line = fp.readline()
 		while len(line):
+			# join wordSet
 			for word in line:
 				if not word in self.wordSet:
 					self.wordSet.add(word)
+			# add start and end mark
 			line = self.history * '\n' + line + self.history * '\n'
+			# construct
 			for i in range(self.history, len(line)):
 				if line[i - self.history : i] in self.data:
 					if line[i] in self.data[line[i - self.history : i]]:
@@ -35,6 +39,7 @@ class N_Gram(object):
 					self.dataTimes[line[i - self.history : i]] += 1
 				else:
 					self.dataTimes[line[i - self.history : i]] = 1
+			# continue loop
 			line = fp.readline()
 		fp.close()
 
@@ -42,6 +47,12 @@ class N_Gram(object):
 		pass
 
 	def parse(self, s):
+		# judge unknow word
+		for word in s:
+			if not word in self.wordSet:
+				print('unknow word')
+				return
+
 		s = self.history * '\n' + s + self.history * '\n'
 		if len(s) < self.history + 1:
 			print('string too short')

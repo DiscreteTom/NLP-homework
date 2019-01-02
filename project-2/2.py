@@ -9,7 +9,7 @@ class N_Gram(object):
 	def __init__(self, n, fileName = ''):
 		'fileName is the training set file'
 		self.history = n - 1 # length of history
-		self.data = {} # format: key: list of length(history), value: list of {word(str): time(int)}
+		self.data = {} # format: key: history(str), value: list of {word(str): time(int)}
 		self.dataTimes = {} # format: key: list of length n, value: time(int)
 		self.wordSet = set()
 		if len(fileName):
@@ -47,9 +47,11 @@ class N_Gram(object):
 
 	def additiveSmoothing(self, n = 1.0):
 		for p in itertools.product(self.wordSet, repeat = self.history):
+			# change tuple to string
 			history = ''
 			for word in p:
 				history += word
+			
 			for word in self.wordSet:
 				if not history in self.data:
 					self.data[history] = {}
@@ -59,6 +61,49 @@ class N_Gram(object):
 				if not history in self.dataTimes:
 					self.dataTimes[history] = 0
 				self.dataTimes[history] += n
+	
+	def goodTuringSmoothing(self):
+		# fill self.data about situation that never happened
+		for p in itertools.product(self.wordSet, repeat = self.history):
+			# change tuple to string
+			history = ''
+			for word in p:
+				history += word
+
+			for word in self.wordSet:
+				if not history in self.data:
+					self.data[history] = {}
+				if not word in self.data[history]:
+					self.data[history][word] = 0
+		
+		n = {} # n[i] means the count of words which appears i times
+		# construct n
+		for history in self.data:
+			for word in self.data[history]:
+				if self.data[history][word] in n:
+					n[self.data[history][word]] += 1
+				else:
+					n[self.data[history][word]] = 1
+		# find most often appear
+		maxAppearence = max(n.keys())
+		# fill n[maxAppearence + 1]
+		for i in range(maxAppearence + 2):
+			if not i in n:
+				n[i] = 0
+		# reset self.data and self.dataTimes
+		for p in itertools.product(self.wordSet, repeat = self.history):
+			# change tuple to string
+			history = ''
+			for word in p:
+				history += word
+
+			for word in self.wordSet:
+				c = self.data[history][word]
+				self.data[history][word] = (c + 1) * n[c + 1] / n[c]
+				# reset self.dataTimes
+				self.dataTimes[history] -= c
+				self.dataTimes[history] += self.data[history][word]
+
 
 	def parse(self, s):
 		# judge unknow word
@@ -89,7 +134,8 @@ if __name__ == '__main__':
 	while len(s):
 		# unigram.parse(s)
 		bigram.parse(s)
-		bigram.additiveSmoothing(0.5)
+		# bigram.additiveSmoothing(0.5)
+		bigram.goodTuringSmoothing()
 		bigram.parse(s)
 		# trigram.parse(s)
 		s = input('input a line to parse, input a blank line to stop:')

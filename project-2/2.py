@@ -45,7 +45,7 @@ class N_Gram(object):
 			line = fp.readline()
 		fp.close()
 
-	def plusOneSmooth(self):
+	def additiveSmoothing(self, n = 1.0):
 		for p in itertools.product(self.wordSet, repeat = self.history):
 			history = ''
 			for word in p:
@@ -55,10 +55,10 @@ class N_Gram(object):
 					self.data[history] = {}
 				if not word in self.data[history]:
 					self.data[history][word] = 0
-				self.data[history][word] += 1
+				self.data[history][word] += n
 				if not history in self.dataTimes:
 					self.dataTimes[history] = 0
-				self.dataTimes[history] += 1
+				self.dataTimes[history] += n
 
 	def parse(self, s):
 		# judge unknow word
@@ -89,7 +89,7 @@ if __name__ == '__main__':
 	while len(s):
 		# unigram.parse(s)
 		bigram.parse(s)
-		bigram.plusOneSmooth()
+		bigram.additiveSmoothing(0.5)
 		bigram.parse(s)
 		# trigram.parse(s)
 		s = input('input a line to parse, input a blank line to stop:')

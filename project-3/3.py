@@ -19,23 +19,37 @@ for i in range(len(rawData)):
 		# 20% data for test
 		testData.append(rawData[i])
 
-# training, construct model parameters
-tagTrans = dict() # state transition probability of tags 'preTag nextTag'->int
+# collect data
+tags = []
+words = []
+for line in trainingData:
+	for item in line:
+		if item.split('/')[0] not in words:
+			words.append(item.split('/')[0])
+		if item.split('/')[1] not in tags:
+			tags.append(item.split('/')[1])
+
+# add start symbol and end symbol
+tags.append('$start$').append('$end$')
+words.append('$start').append('$end$')
+
+# init model parameters
+tagTrans = dict() # state transition probability of tags, 'preTag nextTag'->int
 emit = dict() # observation emit probability, 'tag word'->int
+for preTag in tags:
+	for nextTag in tags:
+		tagTrans[preTag + ' ' + nextTag] = 0
+	for word in words:
+		emit[preTag + ' ' + word] = 0
+
+# training, construct model parameters
 for line in trainingData:
 	# construct emit
 	for item in line:
-		key = item.split('/')[1] + ' ' + item.split('/')[0]
-		if key not in emit:
-			emit[key] = 1
-		else:
-			emit[key] += 1
+		emit[item.split('/')[1] + ' ' + item.split('/')[0]] += 1
 	# add start symbol and end symbol
 	line = ['$start$/$start$'] + line + ['$end$/$end$']
 	# construct tagTrans
 	for i in range(len(line) - 1):
-		key = line[i].split('/')[0] + ' ' + line[i + 1].split('/')[0]
-		if key not in tagTrans:
-			tagTrans[key] = 1
-		else:
-			tagTrans[key] += 1
+		tagTrans[line[i].split('/')[0] + ' ' + line[i + 1].split('/')[0]] += 1
+

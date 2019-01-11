@@ -18,3 +18,24 @@ for i in range(len(rawData)):
 	else:
 		# 20% data for test
 		testData.append(rawData[i])
+
+# training, construct model parameters
+tagTrans = dict() # state transition probability of tags 'preTag nextTag'->int
+emit = dict() # observation emit probability, 'tag word'->int
+for line in trainingData:
+	# construct emit
+	for item in line:
+		key = item.split('/')[1] + ' ' + item.split('/')[0]
+		if key not in emit:
+			emit[key] = 1
+		else:
+			emit[key] += 1
+	# add start symbol and end symbol
+	line = ['$start$/$start$'] + line + ['$end$/$end$']
+	# construct tagTrans
+	for i in range(len(line) - 1):
+		key = line[i].split('/')[0] + ' ' + line[i + 1].split('/')[0]
+		if key not in tagTrans:
+			tagTrans[key] = 1
+		else:
+			tagTrans[key] += 1

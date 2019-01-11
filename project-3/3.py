@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+
+# Part-Of-Speech
+# 词性标注
+
 rawData = [] # format: [['word/tag', 'word/tag', ..., 'word/tag'], ...]
 
 # load file
@@ -30,8 +35,8 @@ for line in trainingData:
 			tags.append(item.split('/')[1])
 
 # add start symbol and end symbol
-tags.append('$start$').append('$end$')
-words.append('$start').append('$end$')
+tags = ['$start$'] + tags + ['$end$']
+words = ['$start'] + words + ['$end$']
 
 # init model parameters
 tagTrans = dict() # state transition probability of tags, 'preTag nextTag'->int
@@ -68,11 +73,45 @@ for tag in tags:
 		emit[tag + ' ' + word] /= count
 
 # process test data, use Viterbi algorithm
+allCorrectCount = 0
+allWordsCount = 0
 for line in testData:
+	allWordsCount += len(line)
+	line = ['$start$/$start$'] + line + ['$end$/$end$']
 	# retrive words and tags in test data
 	testWords = []
 	testTags = []
 	for item in line:
 		testWords.append(item.split('/')[0])
 		testTags.append(item.split('/')[1])
-	# process testWords
+	
+	result = ['' for x in range(len(line))] # result tag sequence
+	result[0] = '$start$'
+	result[-1] = '$end$'
+
+	# process testWords, init Viterbi matrix
+	v = [[0 for x in range(len(tags))] for y in range(len(line))] # v[len(line)][len(tags)]
+	# init Viterbi matrix
+	for j in range(len(tags)):
+		v[1][j] = tagTrans[tags[0] + ' ' + tags[j]] * emit[tags[j] + ' ' + testWords[1]]
+	# recurrence
+	for j in range(len(tags)):
+		for t in range(2, len(testWords) - 1):
+			maxP = 0
+			for i in range(len(tags)):
+				p = v[t - 1][i] * tagTrans[tags[i] + ' ' + tags[j]] * emit[tags[j] + ' ' + testWords[j]]
+				if p > maxP:
+					maxP = p
+					result[t - 1] = tags[i]
+			v[t][j] = maxP
+	# result probability is v[len(line) - 1][len(tags) - 1]
+
+	# output result
+	correctCount = 0
+	for i in range(len(result)):
+		if result[i] == testTags[i]:
+			correctCount += 1
+			allCorrectCount += 1
+	print('single precision:', correctCount - 2 / len(result) - 2) # ignore $start$ and $end$
+	allCorrectCount -= 2 # ignore $start$ and $end$
+print('total precision:', allCorrectCount / allWordsCount)

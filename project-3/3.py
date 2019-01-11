@@ -53,3 +53,16 @@ for line in trainingData:
 	for i in range(len(line) - 1):
 		tagTrans[line[i].split('/')[0] + ' ' + line[i + 1].split('/')[0]] += 1
 
+# change int to double, change count to probobility
+for preTag in tags:
+	count = 0
+	for nextTag in tags:
+		count += tagTrans[preTag + ' ' + nextTag]
+	for nextTag in tags:
+		tagTrans[preTag + ' ' + nextTag] /= count
+for tag in tags:
+	count = 0
+	for word in words:
+		count += emit[tag + ' ' + word]
+	for word in words:
+		emit[tag + ' ' + word] /= count

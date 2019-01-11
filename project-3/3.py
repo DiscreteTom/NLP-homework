@@ -66,3 +66,13 @@ for tag in tags:
 		count += emit[tag + ' ' + word]
 	for word in words:
 		emit[tag + ' ' + word] /= count
+
+# process test data, use Viterbi algorithm
+for line in testData:
+	# retrive words and tags in test data
+	testWords = []
+	testTags = []
+	for item in line:
+		testWords.append(item.split('/')[0])
+		testTags.append(item.split('/')[1])
+	# process testWords

@@ -6,6 +6,7 @@
 rawData = [] # format: [['word/tag', 'word/tag', ..., 'word/tag'], ...]
 
 # load file
+print('loading file...')
 fp = open('data/data2.txt', 'r', encoding = 'utf-8')
 line = fp.readline()
 while len(line):
@@ -15,18 +16,8 @@ while len(line):
 		line = fp.readline()
 fp.close()
 
-# divide into trainingData and testData
-trainingData = [] # format: [['word/tag', 'word/tag', ..., 'word/tag'], ...]
-testData = [] # format: [['word/tag', 'word/tag', ..., 'word/tag'], ...]
-for i in range(len(rawData)):
-	if i < len(rawData) * 0.8:
-		# 80% data for training
-		trainingData.append(rawData[i])
-	else:
-		# 20% data for test
-		testData.append(rawData[i])
-
 # collect data
+print('collect words and tags from raw data...')
 tags = []
 words = []
 for line in rawData:
@@ -40,7 +31,20 @@ for line in rawData:
 tags = ['$start$'] + tags + ['$end$']
 words = ['$start$'] + words + ['$end$']
 
+# divide into trainingData and testData
+print('dividing raw data to training data and test data...')
+trainingData = [] # format: [['word/tag', 'word/tag', ..., 'word/tag'], ...]
+testData = [] # format: [['word/tag', 'word/tag', ..., 'word/tag'], ...]
+for i in range(len(rawData)):
+	if i < len(rawData) * 0.8:
+		# 80% data for training
+		trainingData.append(rawData[i])
+	else:
+		# 20% data for test
+		testData.append(rawData[i])
+
 # init model parameters to 1(add one smmothing)
+print('init model parameters...')
 tagTrans = dict() # state transition probability of tags, 'preTag nextTag'->int
 emit = dict() # observation emit probability, 'tag word'->int
 for preTag in tags:
@@ -50,6 +54,7 @@ for preTag in tags:
 		emit[preTag + ' ' + word] = 1
 
 # training, construct model parameters
+print('training model parameters...')
 for line in trainingData:
 	# construct emit
 	for item in line:
@@ -78,6 +83,7 @@ for tag in tags:
 emit['$start$ $start$'] = emit['$end$ $end$'] = 1
 
 # process test data, use Viterbi algorithm
+print('start parsing...')
 allCorrectCount = 0 # ignore $start$ and $end$
 allWordsCount = 0 # ignore $start$ and $end$
 # total precision = allCorrectCount / allWordsCount
@@ -125,6 +131,6 @@ for index in range(len(testData)):
 		if result[i] == testTags[i]:
 			correctCount += 1
 			allCorrectCount += 1
-	print('progress:', (index + 1) * 100 // len(testData), '%', 'single line precision:', (correctCount - 2) / (len(result) - 2)) # ignore $start$ and $end$
+	print('progress:', (index + 1) * 100 // len(testData), '%', 'single line precision:', (correctCount - 2) * 100 // (len(result) - 2), '%') # ignore $start$ and $end$
 	allCorrectCount -= 2 # ignore $start$ and $end$
 print('total precision:', allCorrectCount / allWordsCount)

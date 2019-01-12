@@ -96,8 +96,8 @@ for line in testData:
 	for j in range(len(tags)):
 		v[1][j] = tagTrans[tags[0] + ' ' + tags[j]] * emit[tags[j] + ' ' + testWords[1]]
 	# recurrence
-	for j in range(len(tags)):
-		for t in range(2, len(testWords) - 1):
+	for t in range(2, len(testWords)):
+		for j in range(len(tags)):
 			maxP = 0
 			for i in range(len(tags)):
 				p = v[t - 1][i] * tagTrans[tags[i] + ' ' + tags[j]] * emit[tags[j] + ' ' + testWords[t]]
@@ -113,6 +113,6 @@ for line in testData:
 		if result[i] == testTags[i]:
 			correctCount += 1
 			allCorrectCount += 1
-	print('single precision:', correctCount - 2 / len(result) - 2) # ignore $start$ and $end$
+	print('single line precision:', (correctCount - 2) / (len(result) - 2)) # ignore $start$ and $end$
 	allCorrectCount -= 2 # ignore $start$ and $end$
 print('total precision:', allCorrectCount / allWordsCount)

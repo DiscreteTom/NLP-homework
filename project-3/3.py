@@ -6,11 +6,13 @@
 rawData = [] # format: [['word/tag', 'word/tag', ..., 'word/tag'], ...]
 
 # load file
-fp = open('data/data.txt', 'r', encoding = 'utf-8')
+fp = open('data/data2.txt', 'r', encoding = 'utf-8')
 line = fp.readline()
 while len(line):
-	rawData.append(line.split('  '))
-	line = fp.readline()
+	line = line[:-1] # discard '\n'
+	if len(line):
+		rawData.append(line.split('  '))
+		line = fp.readline()
 fp.close()
 
 # divide into trainingData and testData
@@ -72,11 +74,15 @@ for tag in tags:
 	for word in words:
 		emit[tag + ' ' + word] /= count
 
+# $start$ must emit $start$, $end$ must emit $end$. ignore smoothing
+emit['$start$ $start$'] = emit['$end$ $end$'] = 1
+
 # process test data, use Viterbi algorithm
 allCorrectCount = 0 # ignore $start$ and $end$
 allWordsCount = 0 # ignore $start$ and $end$
 # total precision = allCorrectCount / allWordsCount
-for line in testData:
+for index in range(len(testData)):
+	line = testData[index]
 	allWordsCount += len(line) # ignore $start$ and $end$
 	line = ['$start$/$start$'] + line + ['$end$/$end$']
 	# retrive words and tags in test data
@@ -85,27 +91,33 @@ for line in testData:
 	for item in line:
 		testWords.append(item.split('/')[0])
 		testTags.append(item.split('/')[1])
-	
-	result = ['' for x in range(len(line))] # result tag sequence, include $start$ and $end$
-	result[0] = '$start$'
-	result[-1] = '$end$'
 
 	# process testWords, init Viterbi matrix
 	v = [[0 for x in range(len(tags))] for y in range(len(line))] # v[len(line)][len(tags)]
+	path = [[0 for x in range(len(tags))] for y in range(len(line))] # path[len(line)][len(tags)]
 	# init Viterbi matrix
 	for j in range(len(tags)):
 		v[1][j] = tagTrans[tags[0] + ' ' + tags[j]] * emit[tags[j] + ' ' + testWords[1]]
+		path[1][j] = 0 # path[1][j] = $start$
 	# recurrence
 	for t in range(2, len(testWords)):
 		for j in range(len(tags)):
-			maxP = 0
 			for i in range(len(tags)):
 				p = v[t - 1][i] * tagTrans[tags[i] + ' ' + tags[j]] * emit[tags[j] + ' ' + testWords[t]]
-				if p > maxP:
-					maxP = p
-					result[t - 1] = tags[i]
-			v[t][j] = maxP
+				if p > v[t][j]:
+					v[t][j] = p
+					path[t][j] = i
 	# result probability is v[len(line) - 1][len(tags) - 1]
+
+	# construct result tags
+	resultIndex = [0 for x in range(len(line))] # result tag index sequence, include $start$ and $end$
+	resultIndex[0] = 0 # $start$
+	resultIndex[-1] = len(tags) - 1 # $end$
+	for i in reversed(range(len(line) - 1)):
+		resultIndex[i] = path[i + 1][resultIndex[i + 1]]
+	result = [] # result tag sequence, include $start$ and $end$
+	for i in resultIndex:
+		result.append(tags[i])
 
 	# output result
 	correctCount = 0
@@ -113,6 +125,6 @@ for line in testData:
 		if result[i] == testTags[i]:
 			correctCount += 1
 			allCorrectCount += 1
-	print('single line precision:', (correctCount - 2) / (len(result) - 2)) # ignore $start$ and $end$
+	print('progress:', (index + 1) * 100 // len(testData), '%', 'single line precision:', (correctCount - 2) / (len(result) - 2)) # ignore $start$ and $end$
 	allCorrectCount -= 2 # ignore $start$ and $end$
 print('total precision:', allCorrectCount / allWordsCount)

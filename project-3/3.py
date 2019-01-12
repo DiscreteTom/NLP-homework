@@ -70,12 +70,14 @@ for preTag in tags:
 	count = 0
 	for nextTag in tags:
 		count += tagTrans[preTag + ' ' + nextTag]
+	count -= 2 # ignore $start$ and $end$
 	for nextTag in tags:
 		tagTrans[preTag + ' ' + nextTag] /= count
 for tag in tags:
 	count = 0
 	for word in words:
 		count += emit[tag + ' ' + word]
+	count -= 2 # ignore $start$ and $end$
 	for word in words:
 		emit[tag + ' ' + word] /= count
 

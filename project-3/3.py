@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Part-Of-Speech
-# 词性标注
+# Part-Of-Speech(Use add-one smoothing)
+# 词性标注（使用加一平滑来平滑数据）
 
 rawData = [] # format: [['word/tag', 'word/tag', ..., 'word/tag'], ...]
 
@@ -27,7 +27,7 @@ for i in range(len(rawData)):
 # collect data
 tags = []
 words = []
-for line in trainingData:
+for line in rawData:
 	for item in line:
 		if item.split('/')[0] not in words:
 			words.append(item.split('/')[0])
@@ -38,14 +38,14 @@ for line in trainingData:
 tags = ['$start$'] + tags + ['$end$']
 words = ['$start$'] + words + ['$end$']
 
-# init model parameters
+# init model parameters to 1(add one smmothing)
 tagTrans = dict() # state transition probability of tags, 'preTag nextTag'->int
 emit = dict() # observation emit probability, 'tag word'->int
 for preTag in tags:
 	for nextTag in tags:
-		tagTrans[preTag + ' ' + nextTag] = 0
+		tagTrans[preTag + ' ' + nextTag] = 1
 	for word in words:
-		emit[preTag + ' ' + word] = 0
+		emit[preTag + ' ' + word] = 1
 
 # training, construct model parameters
 for line in trainingData:

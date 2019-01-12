@@ -7,7 +7,7 @@ rawData = [] # format: [['word/tag', 'word/tag', ..., 'word/tag'], ...]
 
 # load file
 print('loading file...')
-fp = open('data/data2.txt', 'r', encoding = 'utf-8')
+fp = open('data/data.txt', 'r', encoding = 'utf-8')
 line = fp.readline()
 while len(line):
 	line = line[:-1] # discard '\n'

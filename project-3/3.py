@@ -63,16 +63,14 @@ for preTag in tags:
 	count = 0
 	for nextTag in tags:
 		count += tagTrans[preTag + ' ' + nextTag]
-	if count > 0:
-		for nextTag in tags:
-			tagTrans[preTag + ' ' + nextTag] /= count
+	for nextTag in tags:
+		tagTrans[preTag + ' ' + nextTag] /= count
 for tag in tags:
 	count = 0
 	for word in words:
 		count += emit[tag + ' ' + word]
-	if count > 0:
-		for word in words:
-			emit[tag + ' ' + word] /= count
+	for word in words:
+		emit[tag + ' ' + word] /= count
 
 # process test data, use Viterbi algorithm
 allCorrectCount = 0

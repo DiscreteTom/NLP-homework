@@ -14,8 +14,10 @@ class N_Gram(object):
 		self.wordSet = set()
 		if len(fileName):
 			self.openFile(fileName)
+		self.smoothing = ''
 
 	def openFile(self, fileName):
+		print('loading file...')
 		self.data = {} # clear
 
 		fp = open(fileName, 'r', encoding = 'utf-8')
@@ -46,6 +48,8 @@ class N_Gram(object):
 		fp.close()
 
 	def additiveSmoothing(self, n = 1.0):
+		self.smoothing = 'add-' + str(n) + ' smoothing'
+		print('apply', self.smoothing, '...')
 		for p in itertools.product(self.wordSet, repeat = self.history):
 			# change tuple to string
 			history = ''
@@ -63,6 +67,8 @@ class N_Gram(object):
 				self.dataTimes[history] += n
 	
 	def goodTuringSmoothing(self):
+		self.smoothing = 'Good-Turing smoothing'
+		print('apply', self.smoothing, '...')
 		# fill self.data about situation that never happened
 		for p in itertools.product(self.wordSet, repeat = self.history):
 			# change tuple to string
@@ -99,10 +105,11 @@ class N_Gram(object):
 
 			for word in self.wordSet:
 				c = self.data[history][word]
-				self.data[history][word] = (c + 1) * n[c + 1] / n[c]
-				# reset self.dataTimes
-				self.dataTimes[history] -= c
-				self.dataTimes[history] += self.data[history][word]
+				if n[c + 1] != 0: # if n[c + 1] == 0, ignore
+					self.data[history][word] = (c + 1) * n[c + 1] / n[c]
+					# reset self.dataTimes
+					self.dataTimes[history] -= c
+					self.dataTimes[history] += self.data[history][word]
 
 
 	def parse(self, s):
@@ -119,23 +126,29 @@ class N_Gram(object):
 			result = 1
 			for i in range(self.history, len(s)):
 				if s[i - self.history : i] in self.data and s[i] in self.data[s[i - self.history : i]]:
-					result *= self.data[s[i - self.history : i]][s[i]] / self.dataTimes[s[i - self.history : i]]
+					result *= (self.data[s[i - self.history : i]][s[i]] / self.dataTimes[s[i - self.history : i]]) ** -(1 / len(s))
 				else:
 					print('error, unknow situation, please try to smooth data')
 					return
-			print('Word Perplexity:', result ** -(1 / len(s)))
+			if len(self.smoothing):
+				print('After', self.smoothing, ':', end = '')
+			print('Word Perplexity:', result)
 
 
 if __name__ == '__main__':
 	# unigram = N_Gram(1, 'data/TheThreeBodyProblem.txt')
-	bigram = N_Gram(2, 'data/TheThreeBodyProblem.txt')
+	b = N_Gram(2, 'data/TheThreeBodyProblem.txt') # bigram
+	b_a = N_Gram(2, 'data/TheThreeBodyProblem.txt') # bigram with additive smoothing
+	b_a.additiveSmoothing(0.5)
+	b_gt = N_Gram(2, 'data/TheThreeBodyProblem.txt') # bigram with good-turing smoothing
+	b_gt.goodTuringSmoothing()
+
 	# trigram = N_Gram(3, 'data/TheThreeBodyProblem.txt')
 	s = input('input a line to parse, input a blank line to stop:')
 	while len(s):
 		# unigram.parse(s)
-		bigram.parse(s)
-		# bigram.additiveSmoothing(0.5)
-		bigram.goodTuringSmoothing()
-		bigram.parse(s)
+		b.parse(s)
+		b_a.parse(s)
+		b_gt.parse(s)
 		# trigram.parse(s)
 		s = input('input a line to parse, input a blank line to stop:')

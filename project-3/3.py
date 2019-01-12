@@ -36,7 +36,7 @@ for line in trainingData:
 
 # add start symbol and end symbol
 tags = ['$start$'] + tags + ['$end$']
-words = ['$start'] + words + ['$end$']
+words = ['$start$'] + words + ['$end$']
 
 # init model parameters
 tagTrans = dict() # state transition probability of tags, 'preTag nextTag'->int
@@ -56,21 +56,23 @@ for line in trainingData:
 	line = ['$start$/$start$'] + line + ['$end$/$end$']
 	# construct tagTrans
 	for i in range(len(line) - 1):
-		tagTrans[line[i].split('/')[0] + ' ' + line[i + 1].split('/')[0]] += 1
+		tagTrans[line[i].split('/')[1] + ' ' + line[i + 1].split('/')[1]] += 1
 
 # change int to double, change count to probobility
 for preTag in tags:
 	count = 0
 	for nextTag in tags:
 		count += tagTrans[preTag + ' ' + nextTag]
-	for nextTag in tags:
-		tagTrans[preTag + ' ' + nextTag] /= count
+	if count > 0:
+		for nextTag in tags:
+			tagTrans[preTag + ' ' + nextTag] /= count
 for tag in tags:
 	count = 0
 	for word in words:
 		count += emit[tag + ' ' + word]
-	for word in words:
-		emit[tag + ' ' + word] /= count
+	if count > 0:
+		for word in words:
+			emit[tag + ' ' + word] /= count
 
 # process test data, use Viterbi algorithm
 allCorrectCount = 0
@@ -99,7 +101,7 @@ for line in testData:
 		for t in range(2, len(testWords) - 1):
 			maxP = 0
 			for i in range(len(tags)):
-				p = v[t - 1][i] * tagTrans[tags[i] + ' ' + tags[j]] * emit[tags[j] + ' ' + testWords[j]]
+				p = v[t - 1][i] * tagTrans[tags[i] + ' ' + tags[j]] * emit[tags[j] + ' ' + testWords[t]]
 				if p > maxP:
 					maxP = p
 					result[t - 1] = tags[i]

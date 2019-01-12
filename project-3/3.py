@@ -73,10 +73,11 @@ for tag in tags:
 		emit[tag + ' ' + word] /= count
 
 # process test data, use Viterbi algorithm
-allCorrectCount = 0
-allWordsCount = 0
+allCorrectCount = 0 # ignore $start$ and $end$
+allWordsCount = 0 # ignore $start$ and $end$
+# total precision = allCorrectCount / allWordsCount
 for line in testData:
-	allWordsCount += len(line)
+	allWordsCount += len(line) # ignore $start$ and $end$
 	line = ['$start$/$start$'] + line + ['$end$/$end$']
 	# retrive words and tags in test data
 	testWords = []
@@ -85,7 +86,7 @@ for line in testData:
 		testWords.append(item.split('/')[0])
 		testTags.append(item.split('/')[1])
 	
-	result = ['' for x in range(len(line))] # result tag sequence
+	result = ['' for x in range(len(line))] # result tag sequence, include $start$ and $end$
 	result[0] = '$start$'
 	result[-1] = '$end$'
 

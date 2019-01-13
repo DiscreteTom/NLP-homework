@@ -47,15 +47,23 @@ class N_Gram(object):
 			line = fp.readline()
 		fp.close()
 
+	def historyGenerator(self, historyLength = -1):
+		if historyLength == 0:
+			yield ''
+			return
+		if historyLength == -1:
+			historyLength = self.history
+		for i in self.wordSet:
+			generator = self.historyGenerator(historyLength - 1)
+			for history in generator:
+				yield i + history
+
 	def additiveSmoothing(self, n = 1.0):
 		self.smoothing = 'add-' + str(n) + ' smoothing'
 		print('apply', self.smoothing, '...')
-		for p in itertools.product(self.wordSet, repeat = self.history):
-			# change tuple to string
-			history = ''
-			for word in p:
-				history += word
-			
+
+		histories = self.historyGenerator()
+		for history in histories:
 			for word in self.wordSet:
 				if not history in self.data:
 					self.data[history] = {}
@@ -70,12 +78,8 @@ class N_Gram(object):
 		self.smoothing = 'Good-Turing smoothing'
 		print('apply', self.smoothing, '...')
 		# fill self.data about situation that never happened
-		for p in itertools.product(self.wordSet, repeat = self.history):
-			# change tuple to string
-			history = ''
-			for word in p:
-				history += word
-
+		histories = self.historyGenerator()
+		for history in histories:
 			for word in self.wordSet:
 				if not history in self.data:
 					self.data[history] = {}
@@ -137,18 +141,21 @@ class N_Gram(object):
 
 
 if __name__ == '__main__':
-	b = N_Gram(2, 'data/TheThreeBodyProblem.txt') # bigram
-	b_0_5 = N_Gram(2, 'data/TheThreeBodyProblem.txt') # bigram with additive smoothing
-	b_0_5.additiveSmoothing(0.5)
-	b_1 = N_Gram(2, 'data/TheThreeBodyProblem.txt') # bigram with additive smoothing
-	b_1.additiveSmoothing(1)
-	b_gt = N_Gram(2, 'data/TheThreeBodyProblem.txt') # bigram with good-turing smoothing
-	b_gt.goodTuringSmoothing()
+	# t = N_Gram(3, 'data/TheThreeBodyProblem.txt') # bigram
+	t_0_3 = N_Gram(3, 'data/TheThreeBodyProblem.txt') # bigram with additive smoothing
+	t_0_3.additiveSmoothing(0.3)
+	# t_0_5 = N_Gram(3, 'data/TheThreeBodyProblem.txt') # bigram with additive smoothing
+	# t_0_5.additiveSmoothing(0.5)
+	# t_1 = N_Gram(3, 'data/TheThreeBodyProblem.txt') # bigram with additive smoothing
+	# t_1.additiveSmoothing(1)
+	# t_gt = N_Gram(3, 'data/TheThreeBodyProblem.txt') # bigram with good-turing smoothing
+	# t_gt.goodTuringSmoothing()
 
 	s = input('input a line to parse, input a blank line to stop:')
 	while len(s):
-		b.parse(s)
-		b_0_5.parse(s)
-		b_1.parse(s)
-		b_gt.parse(s)
+		# t.parse(s)
+		t_0_3.parse(s)
+		# t_0_5.parse(s)
+		# t_1.parse(s)
+		# t_gt.parse(s)
 		s = input('input a line to parse, input a blank line to stop:')

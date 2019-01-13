@@ -141,21 +141,21 @@ class N_Gram(object):
 
 
 if __name__ == '__main__':
-	# t = N_Gram(3, 'data/TheThreeBodyProblem.txt') # bigram
-	t_0_3 = N_Gram(3, 'data/TheThreeBodyProblem.txt') # bigram with additive smoothing
+	t = N_Gram(3, 'data/TheThreeBodyProblem.txt') # trigram
+	t_0_3 = N_Gram(3, 'data/TheThreeBodyProblem.txt') # trigram with additive smoothing
 	t_0_3.additiveSmoothing(0.3)
-	# t_0_5 = N_Gram(3, 'data/TheThreeBodyProblem.txt') # bigram with additive smoothing
-	# t_0_5.additiveSmoothing(0.5)
-	# t_1 = N_Gram(3, 'data/TheThreeBodyProblem.txt') # bigram with additive smoothing
-	# t_1.additiveSmoothing(1)
-	# t_gt = N_Gram(3, 'data/TheThreeBodyProblem.txt') # bigram with good-turing smoothing
-	# t_gt.goodTuringSmoothing()
+	t_0_5 = N_Gram(3, 'data/TheThreeBodyProblem.txt') # trigram with additive smoothing
+	t_0_5.additiveSmoothing(0.5)
+	t_1 = N_Gram(3, 'data/TheThreeBodyProblem.txt') # trigram with additive smoothing
+	t_1.additiveSmoothing(1)
+	t_gt = N_Gram(3, 'data/TheThreeBodyProblem.txt') # trigram with good-turing smoothing
+	t_gt.goodTuringSmoothing()
 
 	s = input('input a line to parse, input a blank line to stop:')
 	while len(s):
-		# t.parse(s)
+		t.parse(s)
 		t_0_3.parse(s)
-		# t_0_5.parse(s)
-		# t_1.parse(s)
-		# t_gt.parse(s)
+		t_0_5.parse(s)
+		t_1.parse(s)
+		t_gt.parse(s)
 		s = input('input a line to parse, input a blank line to stop:')

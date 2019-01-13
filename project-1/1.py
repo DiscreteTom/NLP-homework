@@ -30,7 +30,8 @@ class Segmentor():
 		while currentIndex < len(string):
 			if currentLookAhead < self.lookAhead:
 				currentLookAhead += 1
-				if currentIndex + currentLookAhead < len(string) and string[startIndex : currentIndex + currentLookAhead + 1] in self.wordSet:
+				if currentIndex + currentLookAhead < len(string) \
+				and string[startIndex : currentIndex + currentLookAhead + 1] in self.wordSet:
 					currentIndex += currentLookAhead
 					currentLookAhead = 0
 				elif currentIndex + currentLookAhead >= len(string):

@@ -10,7 +10,7 @@ class N_Gram(object):
 		'fileName is the training set file'
 		self.history = n - 1 # length of history
 		self.data = {} # format: key: history(str), value: list of {word(str): time(int)}
-		self.dataTimes = {} # format: key: list of length n, value: time(int)
+		self.dataTimes = {} # format: key: string of length n - 1, value: time(int)
 		self.wordSet = set()
 		if len(fileName):
 			self.openFile(fileName)
@@ -126,7 +126,8 @@ class N_Gram(object):
 			result = 1
 			for i in range(self.history, len(s)):
 				if s[i - self.history : i] in self.data and s[i] in self.data[s[i - self.history : i]]:
-					result *= (self.data[s[i - self.history : i]][s[i]] / self.dataTimes[s[i - self.history : i]]) ** -(1 / len(s))
+					result *= (self.data[s[i - self.history : i]][s[i]] / \
+					self.dataTimes[s[i - self.history : i]]) ** -(1 / len(s))
 				else:
 					print('error, unknow situation, please try to smooth data')
 					return
@@ -136,19 +137,18 @@ class N_Gram(object):
 
 
 if __name__ == '__main__':
-	# unigram = N_Gram(1, 'data/TheThreeBodyProblem.txt')
 	b = N_Gram(2, 'data/TheThreeBodyProblem.txt') # bigram
-	b_a = N_Gram(2, 'data/TheThreeBodyProblem.txt') # bigram with additive smoothing
-	b_a.additiveSmoothing(0.5)
+	b_0_5 = N_Gram(2, 'data/TheThreeBodyProblem.txt') # bigram with additive smoothing
+	b_0_5.additiveSmoothing(0.5)
+	b_1 = N_Gram(2, 'data/TheThreeBodyProblem.txt') # bigram with additive smoothing
+	b_1.additiveSmoothing(1)
 	b_gt = N_Gram(2, 'data/TheThreeBodyProblem.txt') # bigram with good-turing smoothing
 	b_gt.goodTuringSmoothing()
 
-	# trigram = N_Gram(3, 'data/TheThreeBodyProblem.txt')
 	s = input('input a line to parse, input a blank line to stop:')
 	while len(s):
-		# unigram.parse(s)
 		b.parse(s)
-		b_a.parse(s)
+		b_0_5.parse(s)
+		b_1.parse(s)
 		b_gt.parse(s)
-		# trigram.parse(s)
 		s = input('input a line to parse, input a blank line to stop:')
